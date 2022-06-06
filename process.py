@@ -7,6 +7,7 @@ import json
 
 import tensorflow.keras
 from tensorflow.keras.applications import VGG16
+from resnet_3d import CustomResnet3DBuilder
 
 # Enforce some Keras backend settings that we need
 tensorflow.keras.backend.set_image_data_format("channels_first")
@@ -31,39 +32,15 @@ def clip_and_scale(
 class Nodule_classifier:
     def __init__(self):
 
-        self.input_size = 224
-        self.input_spacing = 0.2
+        self.input_size = 64
+        self.input_spacing = 1.0
 
-        # load malignancy model
-        self.model_malignancy = VGG16(
-            include_top=True,
-            weights=None,
-            input_tensor=None,
-            input_shape=None,
-            pooling=None,
-            classes=2,
-            classifier_activation="softmax",
-        )
-        self.model_malignancy.load_weights(
-            "/opt/algorithm/models/vgg16_malignancy_best_val_accuracy.h5",
-            by_name=True,
-            skip_mismatch=True,
-        )
-
-        # load texture model
-        self.model_nodule_type = VGG16(
-            include_top=True,
-            weights=None,
-            input_tensor=None,
-            input_shape=None,
-            pooling=None,
-            classes=3,
-            classifier_activation="softmax",
-        )
-        self.model_nodule_type.load_weights(
-            "/opt/algorithm/models/vgg16_noduletype_best_val_accuracy.h5",
-            by_name=True,
-            skip_mismatch=True,
+        self.model = CustomResnet3DBuilder.build_resnet_18((64, 64, 64, 1), 3)
+        self.model.load_weights(
+            # "/opt/algorithm/models/resnet_best_val_acc.h5",
+            "models/resnet18.h5",
+            # by_name=True,
+            # skip_mismatch=True,
         )
 
         print("Models initialized")
@@ -131,8 +108,12 @@ class Nodule_classifier:
         nodule_data = get_cross_slices_from_cube(volume=nodule_data)
         nodule_data = clip_and_scale(nodule_data)
 
-        malignancy = self.model_malignancy(nodule_data[None]).numpy()[0, 1]
-        texture = np.argmax(self.model_nodule_type(nodule_data[None]).numpy())
+        # malignancy = self.model_malignancy(nodule_data[None]).numpy()[0, 1]
+        # texture = np.argmax(self.model_nodule_type(nodule_data[None]).numpy())
+        predictions = self.model(nodule_data[None]).numpy()
+        malignancy = predictions[0][0, 1]
+        texture = predictions[1]
+        pass
 
         result = dict(
             malignancy_risk=round(float(malignancy), 3),
