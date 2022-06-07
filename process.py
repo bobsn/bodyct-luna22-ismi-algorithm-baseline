@@ -35,12 +35,11 @@ class Nodule_classifier:
         self.input_size = 64
         self.input_spacing = 1.0
 
-        self.model = CustomResnet3DBuilder.build_resnet_18((64, 64, 64, 1), 3)
+        self.model = CustomResnet3DBuilder.build_resnet_18((1, 64, 64, 64), 3)
         self.model.load_weights(
-            # "/opt/algorithm/models/resnet_best_val_acc.h5",
-            "models/resnet18.h5",
-            # by_name=True,
-            # skip_mismatch=True,
+            "/opt/algorithm/models/resnet18.h5",
+            by_name=True,
+            skip_mismatch=True,
         )
 
         print("Models initialized")
@@ -105,7 +104,8 @@ class Nodule_classifier:
         )
 
         # Extract the axial/coronal/sagittal center slices of the 50 mm^3 cube
-        nodule_data = get_cross_slices_from_cube(volume=nodule_data)
+        # nodule_data = get_cross_slices_from_cube(volume=nodule_data)
+        nodule_data = np.expand_dims(nodule_data, 0)
         nodule_data = clip_and_scale(nodule_data)
 
         # malignancy = self.model_malignancy(nodule_data[None]).numpy()[0, 1]
@@ -113,7 +113,6 @@ class Nodule_classifier:
         predictions = self.model(nodule_data[None]).numpy()
         malignancy = predictions[0][0, 1]
         texture = predictions[1]
-        pass
 
         result = dict(
             malignancy_risk=round(float(malignancy), 3),
