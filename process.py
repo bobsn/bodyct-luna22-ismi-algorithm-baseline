@@ -138,9 +138,12 @@ class Nodule_classifier:
 
         # malignancy = self.model_malignancy(nodule_data[None]).numpy()[0, 1]
         # texture = np.argmax(self.model_nodule_type(nodule_data[None]).numpy())
-        predictions = self.model(nodule_data[None]).numpy()
-        malignancy = predictions[0][0, 1]
-        texture = predictions[1]
+
+        changed_array = np.expand_dims(nodule_data, 0)
+        predictions = self.model(changed_array)
+        malignancy = predictions[0].numpy()[0, 1]
+        texture = np.argmax(predictions[1].numpy())
+
 
         result = dict(
             malignancy_risk=round(float(malignancy), 3),
