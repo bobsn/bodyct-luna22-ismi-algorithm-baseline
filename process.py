@@ -165,7 +165,9 @@ class Nodule_classifier:
         image = self.load_image()
         result = self.predict(image)
         self.write_outputs(result)
-
+"""
+Dense network
+"""
 def classification_layer(inputs):
     x = tensorflow.keras.layers.Dense(512, activation='relu')(inputs)
     x = tensorflow.keras.layers.Dense(256, activation='relu')(x)
