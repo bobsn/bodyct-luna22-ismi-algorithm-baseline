@@ -85,21 +85,3 @@ def build_model(input_shape, filter_list=[160, 176, 184, 188, 190]):
     output_type = classification_layer(x)
     d_model = tensorflow.keras.Model(inputs=input_layer, outputs=[output_malignancy, output_type])
     return d_model
-
-
-# model = build_model(input_shape=(1, 64, 64, 64), filter_list=[160, 176, 184, 188, 190])
-# random_input = np.random.uniform(size=(1, 1, 64, 64, 64))
-
-# model = build_model(input_shape=(1, 64, 64, 64), filter_list=[60, 66, 68, 70, 72])
-# model.summary()
-#
-# print("random input shape: ", random_input.shape)
-# print(model.predict(random_input))
-
-# Augmentation possibilities:
-# - Dropout
-# - Batch normalization
-# - Initialization
-# - Activations
-# - Regularizers (e.g. L2 normalization)
-# - Image augmentation
